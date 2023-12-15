@@ -1,13 +1,25 @@
-import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { theme, GlobalStyle } from './styles';
+import { Router } from '@shared/index';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyle />
-      <h1>매너장착</h1>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        <Router />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

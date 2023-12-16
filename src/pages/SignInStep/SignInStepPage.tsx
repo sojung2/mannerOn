@@ -101,7 +101,6 @@ const SignInStepPage: React.FC = () => {
     const signInData = getValues('signIn');
     if (signInData) {
       const { pw, pwConfirm } = signInData;
-      console.log('pw =>', pw, 'pwConfirm =>', pwConfirm);
       if (isGetEmailData && !currentStep && REGEX.pw.test(pw) && pw === pwConfirm && pw && pwConfirm) {
         setCurrentStep(currentStep + 1);
         setIsGetEmailData(false);

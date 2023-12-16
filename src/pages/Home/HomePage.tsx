@@ -29,6 +29,7 @@ const HomePage = () => {
   const [currentChatRoomId, setCurrentChatRoomId] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const chatWrapperRef = useRef<HTMLDivElement | null>(null);
+
   const { mutate: postChatStart } = usePostChatStartMutation({
     onSuccess: (res) => {
       const {
@@ -146,22 +147,6 @@ const HomePage = () => {
                     </Box>
                   );
                 })}
-                {/* {chatList.map((chat, i) => {
-                  return (
-                    <Box key={i} display="flexDJC" gap={16}>
-                      {!chat?.aiChat ? (
-                        <ChatBox>{chat?.userChat}</ChatBox>
-                      ) : (
-                        <>
-                          <ChatBox>{chat?.userChat}</ChatBox>
-                          <ChatBox currentChatId={chat?.chatId} role="ai">
-                            {chat?.aiChat || <img src={loding} alt={'loading'} width="10%" />}
-                          </ChatBox>
-                        </>
-                      )}
-                    </Box>
-                  );
-                })} */}
               </Box>
             ) : (
               <>

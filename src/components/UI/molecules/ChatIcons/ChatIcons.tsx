@@ -24,25 +24,9 @@ const ChatIcons: React.FC<ChatIconProps> = ({ text, onChange, currentChatId }) =
   const [likeIconClicked, setLikeIconClicked] = useState(false);
   const [dislikeIconClicked, setDislikeIconClicked] = useState(false);
 
-  const { mutate: putCopyMessage } = usePutCopyMessageMutation({
-    onSuccess: (res) => {
-      console.log('copy message success =>', res);
-    },
-    onError: (err) => {
-      console.log('copy message Error =>', err);
-    },
-  });
+  const { mutate: putCopyMessage } = usePutCopyMessageMutation({});
 
-
-  const { mutate: putFeedback} = usePutFeedbackMutation(currentChatId ?? 0, {
-    onSuccess: (res: HTTPResponse<IconRes> | BusinessErrorResponse) => {
-      console.log('feedback message success =>', res);
-    },
-    onError: (err: Error) => {
-      console.log('feedback message Error =>', err);
-    },
-  });
-
+  const { mutate: putFeedback } = usePutFeedbackMutation(currentChatId ?? 0);
 
   let textString: string | undefined;
   if (typeof text === 'string') {
@@ -58,7 +42,7 @@ const ChatIcons: React.FC<ChatIconProps> = ({ text, onChange, currentChatId }) =
     if (!copyClicked) {
       showModal();
       putCopyMessage({ chatId: currentChatId as number });
-    }else{
+    } else {
       console.error('currentChatId is undefined');
     }
   };
@@ -66,20 +50,20 @@ const ChatIcons: React.FC<ChatIconProps> = ({ text, onChange, currentChatId }) =
   const handleLikeIconClick = () => {
     setLikeIconClicked(!likeIconClicked);
     setDislikeIconClicked(false);
-    if(!likeIconClicked){
-      putFeedback({ feedback: 1});
-    }else if(likeIconClicked){
-      putFeedback({ feedback: -1});
+    if (!likeIconClicked) {
+      putFeedback({ feedback: 1 });
+    } else if (likeIconClicked) {
+      putFeedback({ feedback: -1 });
     }
   };
 
   const handleDislikeIconClick = () => {
     setDislikeIconClicked(!dislikeIconClicked);
     setLikeIconClicked(false);
-    if(!dislikeIconClicked){
-      putFeedback({ feedback: -1});
-    }else if (dislikeIconClicked){
-      putFeedback({ feedback: 1});
+    if (!dislikeIconClicked) {
+      putFeedback({ feedback: -1 });
+    } else if (dislikeIconClicked) {
+      putFeedback({ feedback: 1 });
     }
   };
 

@@ -5,7 +5,7 @@ import { REGEX } from '@shared/index';
 import { Container } from '@UI/template';
 import backIcon from '@assets/icon/backIcon.svg';
 import closeIcon from '@assets/icon/closeIcon.svg';
-import { Box, SvgWrapper, Button, Text } from '@UI/atoms';
+import { Box, SvgWrapper, Button, Text, Modal } from '@UI/atoms';
 import { SignIn, SignInNickName, SignInGender, SignInJob, SignInAge, SignInSuccess } from '@components/SignInStep';
 import { usePostSignUpMutation, useGetEmailDuplicateQuery } from '@apis/signInAPI/signInQuery';
 
@@ -19,6 +19,7 @@ const SignInStepPage: React.FC = () => {
   const [currentAge, setCurrentAge] = useState<string>('20-24세');
   const [isGetEmailData, setIsGetEmailData] = useState<boolean>(false);
   const [isSignInSuccess, setIsSignInSuccess] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     data: emailDuplicateData,
@@ -30,9 +31,7 @@ const SignInStepPage: React.FC = () => {
 
   const { mutate: postSignUp } = usePostSignUpMutation({
     onSuccess: () => setIsSignInSuccess(true),
-    onError: (err) => {
-      // 에러 alert 출력
-    },
+    onError: (err) => setIsModalOpen(true),
   });
 
   const handleClickConfirmButton = () => {
@@ -40,16 +39,16 @@ const SignInStepPage: React.FC = () => {
     const { id, pw, pwConfirm } = getValues('signIn');
     setValue('signInError.pw', !REGEX.pw.test(pw));
     setValue('signInError.pwConfirm', pw !== pwConfirm);
-
     if (!REGEX.id.test(id)) {
       setValue('signInError.id', !REGEX.id.test(id));
       setValue('signInError.id.message', '이메일 형식이 올바르지 않습니다.');
       return;
     }
-    setCurrentEmail(id);
-
     if (!REGEX.pw.test(pw) || pw !== pwConfirm) return;
-    else if (!!currentEmail) emailDuplicateRefetch();
+    else {
+      setCurrentEmail(id);
+      emailDuplicateRefetch();
+    }
   };
 
   const handleClickNextStepButton = () => {
@@ -77,6 +76,19 @@ const SignInStepPage: React.FC = () => {
     setCurrentStep(currentStep + 1);
   };
 
+  const handleClickNewChatButton = () => {
+    if (!currentStep) {
+      setValue('signIn.id', '');
+      setValue('signIn.pw', '');
+      setValue('signIn.pwConfirm', '');
+      navigate('/');
+    } else if (isSignInSuccess) navigate('/home');
+    else setCurrentStep(currentStep - 1);
+    setValue('signInError.id', '');
+    setValue('signInError.pw', '');
+    setValue('signInError.pwConfirm', '');
+  };
+
   useEffect(() => {
     if (emailError) setValue('signInError.id.message', '중복된 이메일입니다.');
     else if (emailDuplicateData) {
@@ -89,7 +101,7 @@ const SignInStepPage: React.FC = () => {
     const signInData = getValues('signIn');
     if (signInData) {
       const { pw, pwConfirm } = signInData;
-      if (isGetEmailData && !currentStep && pw === pwConfirm && pw && pwConfirm) {
+      if (isGetEmailData && !currentStep && REGEX.pw.test(pw) && pw === pwConfirm && pw && pwConfirm) {
         setCurrentStep(currentStep + 1);
         setIsGetEmailData(false);
       }
@@ -106,13 +118,10 @@ const SignInStepPage: React.FC = () => {
   return (
     <Box height={'100vh'}>
       <Box height={50} display={isSignInSuccess ? 'flexEC' : 'flexAlignItemsCenter'}>
+        {isModalOpen && <Modal modalText="회원가입에 실패하였습니다." setModalOpen={setIsModalOpen} />}
         <SvgWrapper
           svg={isSignInSuccess ? closeIcon : backIcon}
-          onClick={() => {
-            if (!currentStep) navigate('/');
-            else if (isSignInSuccess) navigate('/home');
-            else setCurrentStep(currentStep - 1);
-          }}
+          onClick={handleClickNewChatButton}
           style={{ cursor: 'pointer' }}
         />
         {!currentStep && (
@@ -123,7 +132,7 @@ const SignInStepPage: React.FC = () => {
       </Box>
       <Container>
         {!currentStep ? (
-          <SignIn onClickConfirmButton={handleClickConfirmButton} />
+          <SignIn onClickConfirmButton={handleClickConfirmButton} onClickCancelButton={handleClickNewChatButton} />
         ) : (
           <>
             {isSignInSuccess ? (

@@ -1,15 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Box, Button } from '@UI/atoms';
 import { FormInput } from '@UI/molecules';
 import { useFormContext } from 'react-hook-form';
 
 interface SignInProps {
+  onClickCancelButton?: React.MouseEventHandler<HTMLButtonElement>;
   onClickConfirmButton?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-const SignIn: React.FC<SignInProps> = ({ onClickConfirmButton }) => {
-  const navigate = useNavigate();
+const SignIn: React.FC<SignInProps> = ({ onClickConfirmButton, onClickCancelButton }) => {
   const { watch } = useFormContext();
 
   return (
@@ -40,7 +39,7 @@ const SignIn: React.FC<SignInProps> = ({ onClickConfirmButton }) => {
         <Button backgroundColor={'primary'} margin={'24px 0 0 0'} onClick={onClickConfirmButton}>
           확인
         </Button>
-        <Button color={'darkgray'} onClick={() => navigate('/')}>
+        <Button color={'darkgray'} onClick={onClickCancelButton}>
           취소
         </Button>
       </Box>

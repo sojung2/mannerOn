@@ -16,11 +16,9 @@ export default class ChatInApi extends Api {
   }
 
   public postChat(variable: ChatReq): Promise<HTTPResponse<ChatRes> | BusinessErrorResponse> {
-    return this.post<ChatRes, { category: string; chat: string }>({
+    return this.post<ChatRes, { category: string; content: string }>({
       url: API_URL.CHAT.CHAT(variable?.chatroomId),
-      data: { category: variable?.category, chat: variable?.chat },
+      data: { category: variable?.category, content: variable?.content },
     });
   }
-
-
 }

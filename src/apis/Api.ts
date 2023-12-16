@@ -65,7 +65,7 @@ export default class Api {
       if (headers === undefined) {
         headers = {} as AxiosRequestHeaders;
       }
-      headers.authorization = setToken as string;
+      headers.accesstoken = setToken as string;
     }
     const fn = () => this.axiosInstance.get(url, { headers, params, ...options });
     return getHttpResponse<T>({ fn });
@@ -83,6 +83,20 @@ export default class Api {
     const fn = () => this.axiosInstance.post(url, data, { headers });
     return getHttpResponse<T>({ fn });
   }
+
+  public put<T, D = undefined>({ url, data, headers }: RequestParam<D>): Promise<HTTPResponse<T>> {
+    if (sessionStorage.getItem('token') !== null) {
+      const setToken = sessionStorage.getItem('token');
+
+      if (headers === undefined) {
+        headers = {} as AxiosRequestHeaders;
+      }
+      headers.authorization = setToken as string;
+    }
+    const fn = () => this.axiosInstance.put(url, data, { headers });
+    return getHttpResponse<T>({ fn });
+  }
+ 
 }
 
 export const apiInstance = new Api();

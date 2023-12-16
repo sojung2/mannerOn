@@ -1,6 +1,6 @@
 export interface ChatStartReq {
   category: string;
-  chat: string;
+  content: string;
 }
 
 export interface ChatRes {
@@ -16,5 +16,5 @@ export interface ChatRes {
 export interface ChatReq {
   chatroomId: number;
   category: string;
-  chat: string;
+  content: string;
 }

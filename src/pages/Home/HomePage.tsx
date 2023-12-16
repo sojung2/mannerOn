@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { CHAT_PROMPT } from '@libs/prompt';
 import * as S from './styled';
+import loding from '@assets/gif/loading.gif';
 import gnbIcon from '@assets/icon/gnbIcon.svg';
 import dotIcon from '@assets/icon/dotIcon.svg';
 import newChatIcon from '@assets/icon/newChatIcon.svg';
@@ -16,7 +17,7 @@ import { usePostChatStartMutation, usePostChatMutation } from '@apis/chat/chatQu
 interface SelectedQuestion {
   question: string;
   prompt: string;
-  chat: string;
+  content: string;
 }
 
 const HomePage = () => {
@@ -27,31 +28,30 @@ const HomePage = () => {
   const [chatList, setChatList] = useState<{ aiChat: string; userChat: string; chatId: number }[]>([]);
   const [currentChatRoomId, setCurrentChatRoomId] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const chatWrapperRef = useRef<HTMLDivElement | null>(null);
   const { mutate: postChatStart } = usePostChatStartMutation({
     onSuccess: (res) => {
-      console.log('chat start success =>', res);
-      const chat = getValues('chat');
-      const { data } = res;
-      setCurrentChatRoomId(data.chatroomId);
-      if (chat && getValues('chat.userChat')) {
-        setChatList((prev) => {
-          return [...prev, { aiChat: data.content, userChat: getValues('chat.userChat'), chatId: data.chatId }];
-        });
-      }
+      const {
+        data: { data },
+      } = res;
+      setCurrentChatRoomId(data?.chatroomId);
+      setChatList((prev) => {
+        const updatedChatList = prev.slice(0, prev.length - 1);
+        updatedChatList.push({ aiChat: data?.content, userChat: seletedPrompt?.content as string, chatId: data?.chatId });
+        return updatedChatList;
+      });
     },
   });
-
   const { mutate: postChat } = usePostChatMutation({
     onSuccess: (res) => {
-      console.log('chat success =>', res);
-      const chat = getValues('chat');
-      const { data } = res;
-      if (chat && getValues('chat.userChat')) {
-        setChatList((prev) => {
-          return [...prev, { aiChat: data.content, userChat: getValues('chat.userChat'), chatId: data.chatId }];
-        });
-      }
+      const {
+        data: { data },
+      } = res;
+      setChatList((prev) => {
+        const updatedChatList = [...prev];
+        updatedChatList[updatedChatList.length - 1].aiChat = data?.content;
+        return updatedChatList;
+      });
     },
   });
 
@@ -61,7 +61,7 @@ const HomePage = () => {
     const chat = getValues('chat');
     if (selectedQuestion && chat && getValues('chat.userChat')) {
       const { userChat } = getValues('chat');
-      postChat({ chatroomId: currentChatRoomId, category: seletedPrompt?.question as string, chat: userChat });
+      postChat({ chatroomId: currentChatRoomId, category: seletedPrompt?.question as string, content: userChat });
       setChatList((prev) => {
         return [...prev, { aiChat: '', userChat, chatId: 0 }];
       });
@@ -96,55 +96,78 @@ const HomePage = () => {
 
   useEffect(() => {
     if (seletedPrompt?.prompt) {
-      postChatStart({ category: seletedPrompt?.question, chat: seletedPrompt?.prompt });
+      postChatStart({ category: seletedPrompt?.question, content: seletedPrompt?.prompt });
       setChatList((prev) => {
-        return [...prev, { aiChat: '', userChat: seletedPrompt?.chat, chatId: 0 }];
+        return [...prev, { aiChat: '', userChat: seletedPrompt?.content, chatId: 0 }];
       });
     }
   }, [seletedPrompt]);
 
+  useEffect(() => {
+    chatWrapperRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatList]);
+
   return (
-    <Box height={'100vh'}>
-      <Box height={50} display={'flexSBC'}>
-        <SvgWrapper svg={gnbIcon} onClick={handleClickNewChatButton} style={{ cursor: 'pointer' }} />
-        <SvgWrapper svg={newChatIcon} onClick={() => {}} style={{ cursor: 'pointer' }} />
+    <Box height="100vh">
+      <Box height={50} display="flexSBC">
+        <SvgWrapper svg={gnbIcon} onClick={() => setIsModalOpen(true)} style={{ cursor: 'pointer' }} />
+        <SvgWrapper svg={newChatIcon} onClick={handleClickNewChatButton} style={{ cursor: 'pointer' }} />
       </Box>
-      {isModalOpen && <Modal modalText={'히스토리는 곧 만나볼 수 있어요!'} setModalOpen={setIsModalOpen} />}
+      {isModalOpen && <Modal modalText="히스토리는 곧 만나볼 수 있어요!" setModalOpen={setIsModalOpen} />}
       <Container>
         <S.ChatWrapper>
           <S.WrapperTop>
-            <Box display={'flexDAC'} textAlign={'center'}>
+            <Box display="flexDAC" textAlign="center">
               <SvgWrapper width={48} height={48} style={{ marginBlock: '10px' }} svg={blackSmallLogo} />
-              <Text width={270} fontSize={14} fontWeight={500} line-height={18} color={'darkgray'}>
+              <Text width={270} fontSize={14} fontWeight={500} line-height={18} color="darkgray">
                 질문에 포함하면 더 정확한 답변을 받을수 있어요 대화상대, 대화 목적, 예시, 지시사항
               </Text>
             </Box>
           </S.WrapperTop>
           <Box>
             {selectedQuestion ? (
-              <Box display={'flexDJC'} gap={16}>
+              <Box display="flexDJC" gap={16}>
                 {chatList.map((chat, i) => {
                   return (
-                    <Box key={i} display={'flexDJC'} gap={16}>
+                    <Box key={i} display="flexDJC" gap={16}>
+                      <ChatBox>{chat?.userChat}</ChatBox>
+                      <ChatBox currentChatId={chat?.chatId} role="ai">
+                        {chat?.aiChat || (
+                          <img
+                            src={loding}
+                            alt={'loading'}
+                            width="60%"
+                            style={{
+                              padding: '0 0 0 40px',
+                            }}
+                          />
+                        )}
+                      </ChatBox>
+                    </Box>
+                  );
+                })}
+                {/* {chatList.map((chat, i) => {
+                  return (
+                    <Box key={i} display="flexDJC" gap={16}>
                       {!chat?.aiChat ? (
                         <ChatBox>{chat?.userChat}</ChatBox>
                       ) : (
                         <>
                           <ChatBox>{chat?.userChat}</ChatBox>
-                          <ChatBox currentChatId={chat?.chatId} role={'ai'}>
-                            {chat?.aiChat}
+                          <ChatBox currentChatId={chat?.chatId} role="ai">
+                            {chat?.aiChat || <img src={loding} alt={'loading'} width="10%" />}
                           </ChatBox>
                         </>
                       )}
                     </Box>
                   );
-                })}
+                })} */}
               </Box>
             ) : (
               <>
-                <Box display={'flexCC'} textAlign={'center'} padding={'85px 15px 15px 15px'}>
+                <Box display="flexCC" textAlign="center" padding="85px 15px 15px 15px">
                   <SvgWrapper svg={dotIcon} />
-                  <Text width={150} fontSize={14} fontWeight={700} line-height={18} color={'gray50'}>
+                  <Text width={150} fontSize={14} fontWeight={700} line-height={18} color="gray50">
                     이런걸 물어 볼 수 있어요.
                   </Text>
                 </Box>
@@ -152,14 +175,15 @@ const HomePage = () => {
               </>
             )}
           </Box>
+          <div ref={chatWrapperRef}></div>
         </S.ChatWrapper>
-        <Box display={'flexCC'} margin={'20px 0 20px 0'} gap={4}>
+        <Box display="flexCC" margin="20px 0 20px 0" gap={4}>
           <Input
             width={300}
             borderRadius={50}
-            borderColor={'gray20'}
-            backGroundColor={'gray20'}
-            registerName={'chat.userChat'}
+            borderColor="gray20"
+            backGroundColor="gray20"
+            registerName="chat.userChat"
             disabled={!selectedQuestion}
             placeholder={selectedQuestion ? '무슨 고민이 있으신가요?' : '질문을 선택하시면 대화가 시작됩니다'}
           />
@@ -169,5 +193,4 @@ const HomePage = () => {
     </Box>
   );
 };
-
 export default HomePage;

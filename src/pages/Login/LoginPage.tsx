@@ -12,12 +12,12 @@ const LoginPage = () => {
   const { watch, getValues, setValue } = useFormContext();
 
   const { mutate: postSignIn } = usePostSignInMutation({
-    onSuccess: (res) => {
+    onSuccess: () => {
       setValue('loginError.id', false);
       setValue('loginError.pw', false);
       navigate('/home');
     },
-    onError: (err) => {
+    onError: () => {
       setValue('loginError.id', true);
       setValue('loginError.pw', true);
     },
@@ -26,6 +26,12 @@ const LoginPage = () => {
   const handleLoginClick = () => {
     const { id, pw } = getValues('login');
     postSignIn({ email: id, password: pw });
+  };
+
+  const handleClickSignUp = () => {
+    setValue('loginError.id', false);
+    setValue('loginError.pw', false);
+    navigate('/signIn-step');
   };
 
   useEffect(() => {
@@ -65,7 +71,8 @@ const LoginPage = () => {
         </Button>
       </S.WrapperCenter>
       <S.JoinText>
-        아직 회원이 아니신가요?&nbsp;&nbsp;<S.UnderlineText onClick={() => navigate('/signIn-step')}>회원가입</S.UnderlineText>
+        아직 회원이 아니신가요?&nbsp;&nbsp;
+        <S.UnderlineText onClick={handleClickSignUp}>회원가입</S.UnderlineText>
       </S.JoinText>
     </S.Login>
   );

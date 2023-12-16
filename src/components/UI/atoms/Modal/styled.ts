@@ -33,7 +33,7 @@ export const Modal = styled.div<ModalProps>`
   background-color: #000000cc;
   border-radius: 8px;
 
-  animation: ${fadeOutAnimation} 2s ease-in-out forwards;
+  animation: ${fadeOutAnimation} 2.5s ease-in-out forwards;
 `;
 
 export const CopyIconWrapper = styled.div<ModalProps>`

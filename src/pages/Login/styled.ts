@@ -5,7 +5,7 @@ export const Login = styled.section`
 `;
 
 export const WrapperTop = styled.div`
-  color: ${({ theme }) => theme.colors.darkgrey};
+  color: ${({ theme }) => theme.colors.darkgray};
 `;
 export const ImgWrapper = styled.div`
   padding-bottom: 24px;

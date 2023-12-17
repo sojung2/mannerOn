@@ -14,7 +14,7 @@ export const ChatBox = styled.div<ChatBoxProps>`
     return role === 'ai' ? theme.colors.gray20 : theme.colors.secondary;
   }};
   color: ${({ theme, role }) => {
-    return role === 'ai' ? theme.colors.darkgrey : theme.colors.white;
+    return role === 'ai' ? theme.colors.darkgray : theme.colors.white;
   }};
   padding: 16px;
   margin: ${({ role }) => (role === 'ai' ? '0 auto 0 0' : '0 0 0 auto')};

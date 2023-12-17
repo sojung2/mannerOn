@@ -20,7 +20,7 @@ export const CarouselItem = styled.div<CarouselItemProps>`
 
 export const CarouselText = styled.p<CarouselItemProps>`
   ${({ theme }) => theme.fonts.body2_medium};
-  color: ${({ theme }) => theme.colors.darkgrey};
+  color: ${({ theme }) => theme.colors.darkgray};
 `;
 
 export const CarouselDots = styled.div`
